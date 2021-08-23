@@ -1,0 +1,46 @@
+# ------ General ------
+*~
+Untitled*
+# macOS files
+.DS_Store
+# VS Code files
+.vscode
+
+# ------ CMake ------
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+
+# ------ Python ------
+*.pyc
+*.py~
+# Jupyter notebook
+.ipynb_checkpoints
+*.ipynb
+
+# ------ C++ ------
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# ------ Misc ------
+results
+baseline
+temp
+
+build/*
+data/*
+!data/lib/
+!data/scripts/

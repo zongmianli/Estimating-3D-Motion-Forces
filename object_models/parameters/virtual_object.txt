@@ -1,0 +1,6 @@
+name virtual_object
+handle_length_bounds 1.4,2.2
+base_mass 50.
+head_mass 50.
+fix_contact_points 1
+oc_mot_s4 0.

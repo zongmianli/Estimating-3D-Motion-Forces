@@ -1,0 +1,6 @@
+name spade
+handle_length_bounds 0.5,2.5
+base_mass 2.
+head_mass 6.
+fix_contact_points 0
+oc_mot_s4 10000.
