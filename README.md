@@ -4,13 +4,25 @@ Zongmian Li, Jiri Sedlar, Justin Carpentier, Ivan Laptev, Nicolas Mansard and Jo
 
 [Project page](https://www.di.ens.fr/willow/research/motionforcesfromvideo/)
 
-## Installation
+## Introduction
 
 The 3D motion-force estimator relies on a number of open-source libraries listed as follows.
-As a quick setup, users can start by installing the required dependencies and then run the demo code with pre-computed 2D measurements.
-To run the entire pipeline (recognition stage plus estimation stage), all of the following dependencies are needed.
+As a quick setup, it is recommended to compile the estimation stage and test the demo code with the provided recognition stage outputs.
+Otherwise the recognition stage is required if you want to test the method on new videos.
 
-### Required dependencies (estimation stage)
+## Recognition stage
+
+The recognition stage is to be installed and run first on the input video.
+It consists of the following sub-projects:
+
+- Openpose (we are using this [fork](https://github.com/zongmianli/Realtime_Multi-Person_Pose_Estimation))
+- HMR (use this [fork](https://github.com/zongmianli/HMR-imagefolder) instead)
+- [Contact recognizer](https://github.com/zongmianli/contact-recognizer)
+- [Object endpoint recognizer](https://github.com/sedlaj45/endpoints)
+
+## Estimation stage
+
+### Dependencies
 
 - Python 2 (tested on version 2.7.15)
 - [CMake](https://cmake.org/) (tested on version 3.13.4)
@@ -19,20 +31,10 @@ To run the entire pipeline (recognition stage plus estimation stage), all of the
 - [EigenPy](https://github.com/stack-of-tasks/eigenpy) (required for the python bindings; tested on version 1.5.0.)
 - [Pinocchio](https://stack-of-tasks.github.io/pinocchio/) with option Python binding (tested on version 2.0.0)
 - [Ceres solver](http://ceres-solver.org/installation.html) with components EigenSparse, SparseLinearAlgebraLibrary, LAPACK, SuiteSparse, CXSparse, AccelerateSparse, SchurSpecializations (tested on version 2.0.0)
-
-### Optional dependencies (recognition stage)
-
-- Openpose (we are using this [fork](https://github.com/zongmianli/Realtime_Multi-Person_Pose_Estimation))
-- [HMR](https://akanazawa.github.io/hmr/)
-- [Contact-recognizer](https://github.com/zongmianli/contact-recognizer)
-
-### Recommended tools
-
-- [virtualenv](https://virtualenv.pypa.io/en/latest/) (for creating isolated Python environments)
-- [Gepetto-viewer-corba](https://github.com/jmirabel/gepetto-viewer-corba) (for visualization)
 - [Googletest](https://github.com/google/googletest) (for building unit tests)
+- [virtualenv](https://virtualenv.pypa.io/en/latest/) (for creating isolated Python environments)
 
-### Install the project
+### Installation
 
 Please note that, for convenience, we will use `~/Estimating-3D-Motion-Forces` as the default local directory for hosting the code base and the demo data.
 
@@ -67,7 +69,7 @@ Please note that, for convenience, we will use `~/Estimating-3D-Motion-Forces` a
    make -j4
    ```
 
-## Demo
+### Demo
 
 1. Download and set up the [Handtool dataset](https://github.com/zongmianli/Handtool-dataset) in a desired directory, for example, `~/Handtool-dataset`.
 
