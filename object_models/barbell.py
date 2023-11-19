@@ -10,7 +10,7 @@ from object_base import ObjectBase
 try:
 	from lib.display import Visual
 except ImportError:
-	print "barbell.py: Visual not imported"
+	print("barbell.py: Visual not imported")
 
 class Tool(ObjectBase):
     '''

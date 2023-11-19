@@ -1,4 +1,4 @@
-import cPickle as pk
+import pickle as pk
 from os import makedirs, remove
 from os.path import join, exists, abspath, dirname, basename, isfile
 
@@ -22,7 +22,7 @@ def evaluate_handtool_sequence(
     num_keyframes = len(keyframes)
 
     joint_3d_positions = \
-        optimizer.person_loader.joint_3d_positions_[:, keyframes].T.getA()
+        optimizer.person_loader.joint_3d_positions_[:, keyframes].T#.getA()
     joint_3d_positions = joint_3d_positions.reshape((num_keyframes, 24, 3))
 
     # Mapping from the IDs of the 12 joints considered in the Handtool
@@ -109,8 +109,9 @@ def evaluate_parkour_sequence(evaluator, optimizer,
     optimizer.seqForceObject_GT = seqForceObject_GT
 
     # Evalute estimated 3D human motion
+    # print(optimizer.person_loader.joint_3d_positions_.shape) # nq, nframes
     joint_3d_positions_all = \
-        optimizer.person_loader.joint_3d_positions_.T.getA().reshape(
+        optimizer.person_loader.joint_3d_positions_.T.reshape(
             (optimizer.nf, -1, 3)) # nf x njoints x 3 array
     joint_3d_positions_pred = joint_3d_positions_all[:,joint_mapping,:]
     evaluator.Evaluate3DPoses(joint_3d_positions_pred)

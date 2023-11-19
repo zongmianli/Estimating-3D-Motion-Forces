@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.linalg as LA
-import cPickle as pk
+import pickle as pk
 import chumpy as ch
 import xml.etree.ElementTree as ET
 from glob import glob
@@ -281,12 +281,6 @@ def getAnnotationFromXML(XMLPath, objPts=None, groundPts=None, bodyJoints=None):
 
 
 def procrustes(A, B):
-    '''
-    Solves the orthogonal Procrustes problem given a set of 3D points A (3 x N)
-    and a set of target 3D points B (3 x N). Namely, it computes a group of
-    R(otation), t(ranslation) and s(cale) that aligns A with B.
-    '''
-    # input check
     transposed = False
     if A.shape[0]!=3:
         A = A.T
@@ -294,10 +288,8 @@ def procrustes(A, B):
         transposed = True
     N = A.shape[1]
     assert(B.shape==(3,N))
-    # compute mean
     a_bar = A.mean(axis=1, keepdims=True)
     b_bar = B.mean(axis=1, keepdims=True)
-    # calculate rotation
     A_c = A - a_bar
     B_c = B - b_bar
     M = A_c.dot(B_c.T)
@@ -306,11 +298,8 @@ def procrustes(A, B):
     Z = np.eye(U.shape[0])
     Z[-1,-1] = LA.det(V)*LA.det(U)
     R = V.dot(Z.dot(U.T))
-    # compute scale
     s = np.trace(R.dot(M)) / np.trace(A_c.T.dot(A_c))
-    # compute translation
     t = b_bar - s*(R.dot(a_bar))
-    # compute A after alignment
     A_hat = s*(R.dot(A)) + t
     if transposed:
         A_hat = A_hat.T
@@ -343,7 +332,7 @@ def load_3d_human_pose_from_smpl(video_name, gender, shape_path, j3d_path):
 			smpl_model.shapedirs[:,:,i]) for i in range(n_betas)])
 		j3dCanoPos = ch.array(j3dDirs).dot(betas) + \
 			smpl_model.J_regressor.dot(smpl_model.v_template.r)
-		print 'load j3dCanoPos for *{0}*'.format(video_name)
+		print('load j3dCanoPos for *{0}*'.format(video_name))
 	j3d_pos = j3dCanoPos.r
 	# save j3d_pos to file
 	if exists(j3d_path):
@@ -356,7 +345,7 @@ def load_3d_human_pose_from_smpl(video_name, gender, shape_path, j3d_path):
 			makedirs(dirname(j3d_path))
 	with open(j3d_path, 'w') as outfj3d:
 		pk.dump(data, outfj3d)
-		print 'save j3dCanoPos to {0}'.format(j3d_path)
+		print('save j3dCanoPos to {0}'.format(j3d_path))
 	return j3d_pos
 
 
@@ -380,9 +369,8 @@ def load_config_smplify_com(video_name,
 	seqCam = None
 	with open(pose_path, 'r') as fpose:
 		data = pk.load(fpose)
-		#print data[video_name].shape
 		seqPoses = data[video_name][frame_start:frame_end]
-		print 'pose data loaded from {}'.format(pose_path)
+		print('pose data loaded from {}'.format(pose_path))
 	depth_offset = 0.
 	with open(cam_path, 'r') as fcam:
 		data = pk.load(fcam)
@@ -391,7 +379,7 @@ def load_config_smplify_com(video_name,
 		# center the depth to zero
 		depth_offset = np.mean(seqTrans[:,2])
 		seqTrans[:,2] -= depth_offset
-		print 'camera loaded from {}'.format(cam_path)
+		print('camera loaded from {}'.format(cam_path))
 	seqConfigSMPL = np.concatenate((seqTrans, seqPoses), axis=1)
 	seqConfigSMPL = np.matrix(seqConfigSMPL).T
 	# convert seqConfigSMPL to seqConfig
@@ -416,64 +404,15 @@ def load_config_smplify_com(video_name,
 	return seqConfig, cam
 
 
-# def axis_angles_to_quaternions(axisAngles, wxyz=False):
-# 	'''
-# 	converts a 3 x nf matrix, axisAngles, whose columns are axis-angles,
-# 	to a 4 x nf matrix of quaternions under the (x,y,z,w) convention.
-# 	The quaternions should always have norm 1.
-# 	'''
-# 	nf = axisAngles.shape[1]
-# 	# convert to array for point-wise division
-# 	axisAngles = axisAngles.getA()
-# 	# get rotation axis and angles
-# 	angles = LA.norm(axisAngles, axis=0).reshape((1,nf))
-# 	axis = axisAngles/np.tile(angles, (3,1))
-# 	# compute quaternions
-# 	quats = np.zeros((4, nf))
-# 	if wxyz:
-# 		quats[0,:] = np.cos(angles/2.0).reshape(-1)
-# 		quats[1:,:] = axis * np.tile(np.sin(angles/2.0), (3,1))
-# 	else:
-# 		quats[:3,:] = axis * np.tile(np.sin(angles/2.0), (3,1))
-# 		quats[3,:] = np.cos(angles/2.0).reshape(-1)
-# 	return np.matrix(quats)
-
-
-# def quaternions_to_axis_angles(quats, wxyz=False):
-# 	'''
-# 	converts a 4 x nf matrix, quats, whose columns are quaternions under
-# 	the (x,y,z,w) convention, to a (3 x nf) matrix of axis-angle rotations.
-# 	The function normalizes the quaternions to norm 1 before convertion.
-# 	'''
-# 	# convert to array for point-wise division
-# 	quats = quats.getA()
-# 	# normalzie the columns of quats
-# 	norms = LA.norm(quats, axis=0)
-# 	quats = quats/np.tile(norms, (4,1))
-# 	if wxyz:
-# 		# get thetas
-# 		thetas = 2.*np.arccos(quats[0,:])
-# 		# get rotation axis u
-# 		u = quats[1:,:]/np.tile(np.sin(thetas/2.), (3,1))
-# 	else:
-# 		# get thetas
-# 		thetas = 2.*np.arccos(quats[3,:])
-# 		# get rotation axis u
-# 		u = quats[:3,:]/np.tile(np.sin(thetas/2.), (3,1))
-# 	# get axis angle vectors
-# 	axisAngles = np.matrix(u*thetas)
-# 	return axisAngles
-
-
 def set_meshcat_camera_view(gui, camera_angle=0):
     '''
     Adjust the camera view of the Meshcat GUI
     '''
-    R1 = se3.AngleAxis(np.pi/2., np.matrix([0.,0.,-1.]).T).matrix()
-    R2 = se3.AngleAxis(np.pi/2., np.matrix([1.,0.,0.]).T).matrix()
+    R1 = se3.AngleAxis(np.pi/2., np.matrix([0.,0.,-1.]).T)
+    R2 = se3.AngleAxis(np.pi/2., np.matrix([1.,0.,0.]).T)
     #R3 = se3.AngleAxis(camera_angle, np.matrix([0.,1.,0.]).T).matrix()
     R = R2*R1
     t = np.matrix([0., 0., 0.]).T
-    oMcam = se3.SE3(R, t)
+    oMcam = se3.SE3(R.matrix(), t)
     gui["/Cameras/default"].set_transform(
         np.array(oMcam.homogeneous))

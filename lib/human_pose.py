@@ -1,8 +1,8 @@
 import numpy as np
 import numpy.linalg as LA
 import chumpy as ch
-import cPickle as pk
-from smpl_webuser.serialization import load_model
+import pickle as pk
+from person_models.smpl.smpl_webuser.serialization import load_model
 
 
 def ComputeJoint3dPositionsInNeutralPose(model_path, betas,
@@ -44,8 +44,8 @@ def ComputeJoint3dPositionsInNeutralPose(model_path, betas,
     joint_3d_positions_smpl = joint_3d_positions_smpl.r
 
     # Get Cocoplus joint 3D positions
-    with open(model_path, 'r') as f:
-        cocoplus_regressor = pk.load(f)["cocoplus_regressor"]
+    with open(model_path, 'rb') as f:
+        cocoplus_regressor = pk.load(f, encoding='latin-1')["cocoplus_regressor"]
         joints_3d_dirs = np.dstack([cocoplus_regressor.dot(
             smpl_model.shapedirs[:, :, i]) for i in range(n_betas)])
         joint_3d_positions_cocoplus = ch.array(joints_3d_dirs).dot(betas) + \
@@ -78,8 +78,8 @@ def LoadOpenposeOutputs(openpose_path, video_name, frame_start, frame_end,
                         scale_hip_confidence=0.8, scale_head_confidence=0.5):
 
     # Loading 2d poses
-    with open(openpose_path, 'r') as f:
-        joints_2d = pk.load(f)[video_name][:,:,:3].astype(float) # nf x 18 x 3
+    with open(openpose_path, 'rb') as f:
+        joints_2d = pk.load(f, encoding='latin-1')[video_name][:,:,:3].astype(float) # nf x 18 x 3
         (nframes, num_joints, ndim) = joints_2d.shape
 
     # The 3rd dimension of joints_2d represent (x, y, confidence score).
@@ -161,9 +161,9 @@ def ReplaceUnconfidentOpenposeJointsWithHMRJoints(
 
 #
 def LoadHmrOutputs(hmr_path, video_name, frame_start, frame_end):
-
-    with open(hmr_path, 'r') as f:
-        data = pk.load(f)[video_name]
+    print(hmr_path)
+    with open(hmr_path, 'rb') as f:
+        data = pk.load(f, encoding='latin-1')[video_name]
 
     shapes = data['shapes'][(frame_start-1):frame_end]
     trans = data['trans'][(frame_start-1):frame_end]

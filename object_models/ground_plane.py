@@ -13,8 +13,8 @@ try:
     import meshcat.transformations as tf
     from lib.display import Visual
 except ImportError:
-    print "ground_plane.py: Visual not imported"
-from object_base import ObjectBase
+    print("ground_plane.py: Visual not imported")
+from .object_base import ObjectBase
 
 
 class GroundPlane(ObjectBase):

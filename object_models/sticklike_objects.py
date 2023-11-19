@@ -6,14 +6,14 @@ import pinocchio as se3
 from pinocchio.utils import *
 from pinocchio.explog import exp, log
 
-from object_base import ObjectBase
+from .object_base import ObjectBase
 try:
     import meshcat
     import meshcat.geometry as g
     import meshcat.transformations as tf
     from lib.display import Visual
 except ImportError:
-    print "sticklike_objects.py: Visual not imported"
+    print("sticklike_objects.py: Visual not imported")
 from lib.utils import load_parameters_from_txt,rgb_to_hex,rotation_matrix
 
 

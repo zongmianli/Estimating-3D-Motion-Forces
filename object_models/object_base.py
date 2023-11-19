@@ -14,7 +14,7 @@ try:
     import meshcat.transformations as tf
     from lib.display import Visual
 except ImportError:
-    print "object_base.py: Visual not imported"
+    print("object_base.py: Visual not imported")
 
 class ObjectBase:
     '''
@@ -52,7 +52,7 @@ class ObjectBase:
         # use the y-axis as the direction of gravity
         model = self.model
         gravity = model.gravity
-        gravity.linear = np.matrix([0.,-gravity.linear[2,0],0.]).T
+        gravity.linear = np.matrix([0.,-gravity.linear[2],0.]).T
         # arguments that will be updated later
         self.name = None
         self.njoints = 0
@@ -136,10 +136,10 @@ class ObjectBase:
                 if self.name == "ground":
                     # update operational frames for ground contact points
                     # we put x and z translation to column 0 and 1, respectively
-                    q_ctt = q_ctt.getA().reshape((-1,2))
+                    q_ctt = q_ctt.reshape((-1,2))
                     for fid in range(1, self.num_contacts+1):
                         contact_pos = self.model.frames[fid].placement.translation
-                        contact_pos[[0,2],0] = q_ctt[fid-1]
+                        contact_pos[[0,2]] = q_ctt[fid-1]
                         self.model.frames[fid].placement.translation = contact_pos
                     se3.framesForwardKinematics(self.model, self.data, q_pino)
                 else:
@@ -173,7 +173,7 @@ class ObjectBase:
             # Save the new list of visuals
             self.visuals = visuals_new
         else:
-            print "viewer does not exist. Nothing deleted."
+            print("viewer does not exist. Nothing deleted.")
 
 
     def GenerateDecoration(self):
@@ -221,7 +221,7 @@ class ObjectBase:
             elif decoration[j,2] in [3,4,5,6,7,8]:
                 cumulateQIndex += 1
             else:
-                print "warning (generateDecoration): unknown joint type!"
+                print("warning (generateDecoration): unknown joint type!")
             # index in Pinocchio configuration vector we start reading the joint
             # note that Pinocchio uses quaternion for rotation
             decoration[j,4] = cumulateQPinoIndex
@@ -232,7 +232,7 @@ class ObjectBase:
             elif decoration[j,2] in [3,4,5,6,7,8]:
                 cumulateQPinoIndex += 1
             else:
-                print "warning (generateDecoration): unknown joint type!"
+                print("warning (generateDecoration): unknown joint type!")
         return decoration
 
 

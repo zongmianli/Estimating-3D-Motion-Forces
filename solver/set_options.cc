@@ -208,10 +208,10 @@ void SetOptions(ceres::Problem &problem,
             double * parameters = person_loader.mutable_config(i);
             if (problem.HasParameterBlock(parameters))
             {
-                ceres::SubsetParameterization *parameterization_constant_entries =
-                    new ceres::SubsetParameterization(75, constant_entries);
-                problem.SetParameterization(parameters,
-                                            parameterization_constant_entries);
+                ceres::SubsetManifold *parameterization_constant_entries =
+                    new ceres::SubsetManifold(75, constant_entries);
+                problem.SetManifold(parameters,
+                                    parameterization_constant_entries);
             }
         }
     }
@@ -236,10 +236,10 @@ void SetOptions(ceres::Problem &problem,
         double * parameters = ground_loader.mutable_config(0);
         if (problem.HasParameterBlock(parameters))
         {
-            ceres::SubsetParameterization *parameterization_constant_entries =
-                new ceres::SubsetParameterization(6, constant_entries);
-            problem.SetParameterization(parameters,
-                                        parameterization_constant_entries);
+            ceres::SubsetManifold *parameterization_constant_entries =
+                new ceres::SubsetManifold(6, constant_entries);
+            problem.SetManifold(parameters,
+                                parameterization_constant_entries);
         }
     }
 
@@ -367,10 +367,10 @@ void FreezeJoints(ceres::Problem &problem,
         parameters = person_loader.mutable_config(i);
         if (problem.HasParameterBlock(parameters))
         {
-            ceres::SubsetParameterization *parameterization_constant_entries =
-                new ceres::SubsetParameterization(75, constant_entries);
-            problem.SetParameterization(parameters,
-                                        parameterization_constant_entries);
+            ceres::SubsetManifold *parameterization_constant_entries =
+                new ceres::SubsetManifold(75, constant_entries);
+            problem.SetManifold(parameters,
+                                parameterization_constant_entries);
         }
     }
 }

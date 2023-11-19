@@ -1,21 +1,21 @@
 import math
 import numpy as np
 import numpy.linalg as LA
-import cPickle as pk
+import pickle as pk
 
 import pinocchio as se3
 from pinocchio.utils import *
 from pinocchio.explog import exp,log
 
 from lib.utils import *
-from limb import Limb
+from .limb import Limb
 try:
     import meshcat
     import meshcat.geometry as g
     import meshcat.transformations as tf
     from lib.display import Visual
 except ImportError:
-    print "person.py: viewer not imported"
+    print("person.py: viewer not imported")
 
 
 class Person(Limb):
@@ -46,7 +46,7 @@ class Person(Limb):
         # Use the y-axis as the direction of gravity
         model = self.model
         gravity = model.gravity
-        gravity.linear = np.matrix([0.,-gravity.linear[2,0],0.]).T
+        gravity.linear = np.matrix([0.,-gravity.linear[2],0.]).T
 
         self.nj = 24 # number of joints
         #              joint names       SMPL  Pinocchio
@@ -107,12 +107,12 @@ class Person(Limb):
 
 
     def loadInertias(self, pathToInertia):
-        with open(pathToInertia, 'r') as inputf:
-            inertias_temp = pk.load(inputf)
+        with open(pathToInertia, 'rb') as inputf:
+            inertias_temp = pk.load(inputf, encoding='latin-1')
             inertias = {}
             for k in inertias_temp.keys():
                 inertias[self.name+'_'+k] = inertias_temp[k]
-            print "inertias loaded from "+pathToInertia
+            print("inertias loaded from "+pathToInertia)
             return inertias
 
 
@@ -130,7 +130,7 @@ class Person(Limb):
             for name in self.keypoint_names:
                 self.viewer['openpose_'+name].delete()
         else:
-            print 'Viewer does not exist. Nothing deleted.'
+            print('Viewer does not exist. Nothing deleted.')
 
 
     def computeRelativeTranslation(self, j3dPos):

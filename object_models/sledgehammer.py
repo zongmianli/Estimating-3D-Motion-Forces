@@ -10,7 +10,7 @@ from object_base import ObjectBase
 try:
     from lib.display import Visual
 except ImportError:
-    print "sledgehammer.py: Visual not imported"
+    print("sledgehammer.py: Visual not imported")
 
 class Tool(ObjectBase):
     '''

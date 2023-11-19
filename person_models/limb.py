@@ -13,7 +13,7 @@ try:
     import meshcat.transformations as tf
     from lib.display import Visual
 except ImportError:
-    print "limb.py: viewer not imported"
+    print("limb.py: viewer not imported")
 
 class Limb:
     '''
@@ -148,9 +148,9 @@ class Limb:
                     cttPos = solePlacement.act(np.matrix(cttLocalPos[k]).T)
                     # save contact positions
                     if jointName == self.name+'_l_ankle':
-                        self.leftSoleCttPos[k] = cttPos.getA().reshape(-1)
+                        self.leftSoleCttPos[k] = cttPos
                     else:
-                        self.rightSoleCttPos[k] = cttPos.getA().reshape(-1)
+                        self.rightSoleCttPos[k] = cttPos
                     cttPlacement = se3.SE3(np.matrix(np.eye(3)), cttPos)
                     # or alternatively
                     parentFid = self.model.nframes-1
@@ -283,7 +283,7 @@ class Limb:
             elif decoration[j,2] in [3,4,5,6,7,8]:
                 cumulateQIndex += 1
             else:
-                print "warning (generateDecoration): unknown joint type!"
+                print("warning (generateDecoration): unknown joint type!")
             # index in Pinocchio configuration vector we start reading the joint
             # note that Pinocchio uses quaternion for rotation
             decoration[j,4] = cumulateQPinoIndex
@@ -294,7 +294,7 @@ class Limb:
             elif decoration[j,2] in [3,4,5,6,7,8]:
                 cumulateQPinoIndex += 1
             else:
-                print "warning (generateDecoration): unknown joint type!"
+                print("warning (generateDecoration): unknown joint type!")
         return decoration
 
 

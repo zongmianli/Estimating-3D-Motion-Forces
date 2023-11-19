@@ -1,5 +1,5 @@
 import numpy as np
-import cPickle as pk
+import pickle as pk
 
 
 def load_raw_contact_states(pkl_path, video_name, joint_mapping,
@@ -13,8 +13,8 @@ def load_raw_contact_states(pkl_path, video_name, joint_mapping,
     to these 9 joints contain information, while the others are all zero.
     '''
 
-    with open(pkl_path, 'r') as f:
-        data = pk.load(f)
+    with open(pkl_path, 'rb') as f:
+        data = pk.load(f, encoding='latin-1')
         item_id = data['item_names'].index(video_name)
         preds = data['contact_states'][item_id][(frame_start-1):frame_end]
 

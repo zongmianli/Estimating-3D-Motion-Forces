@@ -3,7 +3,6 @@ import shutil
 import cv2 as cv
 import numpy as np
 import logging
-import cPickle as pk
 import argparse
 from glob import glob
 from os import makedirs, remove
@@ -87,8 +86,6 @@ class VideoRecorder(object):
             scaling.append(h_target/(float)(h_crop))
 
         for i in range(num_frames):
-
-            #print 'frame #{}'.format(i)
             frame_img = 255*np.ones((h_target, w_target*num_sources + (num_sources-1)*margin, 3), np.uint8)
             y_offset = 0
             for n in range(num_sources):
@@ -185,8 +182,6 @@ class VideoRecorder(object):
                             frame_size,
                             save_path,
                             fps=10)
-        
-        
         '''
         if (len(image_folders) != 4):
             raise ValueError("len(image_folders) != 4")
@@ -225,7 +220,7 @@ class VideoRecorder(object):
         fourcc = cv.VideoWriter_fourcc(*'mp4v')
         video = cv.VideoWriter(save_path, fourcc, fps, (frame_size[1], frame_size[0]))
         for i in range(num_frames):
-            print 'frame #{}'.format(i)
+            print('frame #{}'.format(i))
             grid_images = []
             for n in range(4):
                 # top-left, top-right, bottom-left, bottom-right
@@ -280,7 +275,7 @@ def make_video_from_image_folder(path_to_image_folder,
     fourcc = cv.VideoWriter_fourcc(*'mp4v')
     video = cv.VideoWriter(save_name, fourcc, fps, (fwidth, fheight))
     for i in range(nframes):
-        print 'frame #{}'.format(i)
+        print('frame #{}'.format(i))
         frame_img = cv.imread(image_paths[i])
         canvas = frame_img.copy()
         # Write out frame to video
@@ -355,7 +350,7 @@ def make_video_from_image_folder(path_to_image_folder,
 #     fourcc = cv.VideoWriter_fourcc(*'mp4v')
 #     video = cv.VideoWriter(save_path, fourcc, fps, (frame_width, frame_height))
 #     for i in range(num_frames):
-#         print 'frame #{}'.format(i)
+#         print('frame #{}'.format(i))
 #         #frame_image = self.MakeGridImage()
 #         image_paths = []
 #         for n in range(num_folders):

@@ -27,8 +27,8 @@ class Visual:
 
 
     def Place(self, viewer, oMi):
-        oMbody = oMi*self.placement
-        viewer[self.name].set_transform(oMbody.homogeneous.getA())
+        oMbody = oMi * self.placement
+        viewer[self.name].set_transform(oMbody.homogeneous)
 
 
 class PointCloud:
@@ -73,7 +73,7 @@ class PointCloud:
         for i in range(self.num_points):
             name = self.names[i]
             placement = se3.SE3(eye(3), q[(3*i):(3*i+3),0])
-            self.viewer[name].set_transform(placement.homogeneous.getA())
+            self.viewer[name].set_transform(placement.homogeneous)
 
 
     def Display2d(self, q):
@@ -82,4 +82,4 @@ class PointCloud:
             name = self.names[i]
             translation[:2, 0] = q[(3*i):(3*i+2),0]
             placement = se3.SE3(eye(3), translation)
-            self.viewer[name].set_transform(placement.homogeneous.getA())
+            self.viewer[name].set_transform(placement.homogeneous)

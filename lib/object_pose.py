@@ -1,6 +1,5 @@
 import numpy as np
 import numpy.linalg as LA
-import cPickle as pk
 from glob import glob
 from os import makedirs, remove
 from os.path import join, exists, abspath, dirname, basename, isfile
@@ -26,7 +25,7 @@ def load_object_2d_endpoints(
         if data.shape[0] > 0:
             fids = data[::npts,0].astype(int)
             endPts = np.zeros((fids.shape[0], 0)).astype(int)
-            # In Jiri's raw output, the 1st endpoint is red, the 2nd is green
+            # In the raw object output, the 1st endpoint is red, the 2nd is green
             for n in range(npts):
                 endPts = np.concatenate((endPts, data[n::npts,1:]), axis=1)
         else:
@@ -139,7 +138,6 @@ def LoadObject2dEndpoints(video_name, npts=2):
     # load endpoints
     with open(endpts_path, 'r') as f:
         data_endpts = np.loadtxt(f)
-        #print data_endpts.shape
         if data_endpts.shape[0] > 0:
             fids = data_endpts[::npts,0].astype(int)
             endPts = np.zeros((fids.shape[0], 0)).astype(int)
@@ -156,7 +154,7 @@ def LoadObject2dEndpoints(video_name, npts=2):
         nf = scores.shape[0]
 
     # correct the order of object endpoints.
-    # NOTE: In Jiri's raw output, the 1st endpoint is red, the 2nd is green
+    # In object raw output, the 1st endpoint is red, the 2nd is green
     # barbell: 0 - right point, 1 - left point
     # scythe:  0 - handle end, 1 - head
     # spade: 0 - head, 1 - handle end

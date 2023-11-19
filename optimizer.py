@@ -1,10 +1,9 @@
 import time
 import numpy as np
 import numpy.linalg as LA
-import cPickle as pickle
+import pickle
 from os import makedirs, remove
 from os.path import join, exists, abspath, dirname, basename, isfile
-from scipy.optimize import fmin_bfgs, fmin_slsqp, minimize
 from glob import glob
 
 import pinocchio as se3
@@ -17,9 +16,9 @@ try:
     import meshcat.geometry as g
     import meshcat.transformations as tf
     from lib.display import PointCloud
-    from lib.video_recorder import VideoRecorder # TODO
+    from lib.video_recorder import VideoRecorder
 except ImportError:
-    print "optimizer.py: PointCloud,VideoRecorder not imported"
+    print("optimizer.py: PointCloud,VideoRecorder not imported")
 from lib.utils import *
 
 
@@ -138,7 +137,7 @@ class Optimizer(object):
                 for name in self.names_muscleTorque:
                     self.viewer[name].delete()
         else:
-            print 'Viewer does not exist. Nothing deleted.'
+            print('Viewer does not exist. Nothing deleted.')
 
 
     def DeleteGroundTruthForceVisuals(self):
@@ -155,7 +154,7 @@ class Optimizer(object):
                     self.viewer[name+'f'].delete()
                     self.viewer[name+'t'].delete()
         else:
-            print 'Viewer does not exist. Nothing deleted.'
+            print('Viewer does not exist. Nothing deleted.')
 
 
     def Compute6dGroundContactForces(self):
@@ -175,16 +174,17 @@ class Optimizer(object):
                     fid = contact_mapping[j]
                     if j not in [3, 7]:
                         # c is a frame whose origin is at j, and whose axis are in parallel to world axis
-                        coefs = ground_friction_vec[(4*(fid-1)):(4*(fid-1)+4), 0]
-                        cPhic = self.gen6dGround * coefs
+                        coefs = ground_friction_vec[(4*(fid-1)):(4*(fid-1)+4)]
+                        cPhic = self.gen6dGround @ coefs
                     else:
-                        coefs = ground_friction_vec[(4*(fid-1)):(4*(fid-1)+16), 0]
+                        coefs = ground_friction_vec[(4*(fid-1)):(4*(fid-1)+16)]
+
                         if j == 3:
-                            cPhic = self.gen6dLeftFoot * coefs
+                            cPhic = self.gen6dLeftFoot @ coefs
                         else:
-                            cPhic = self.gen6dRightFoot * coefs
+                            cPhic = self.gen6dRightFoot @ coefs
                     # cPhic: spatial forces expressed in local frames of person joint j
-                    self.seqLocalForceGround[(6*n):(6*n+6), i] = cPhic.copy()
+                    self.seqLocalForceGround[(6*n):(6*n+6), i] = np.array([cPhic]).T
 
 
     def ExpressLocalForcesInParkourFrame(self, person_config):
@@ -260,7 +260,7 @@ class Optimizer(object):
                 # 2. from "contact" frame to Parkour joint frame
                 f_parkour = parkourM_c.act(f_c)
                 contact_forces_parkour[i,k,:] += \
-                    f_parkour.vector.getA().reshape(-1)
+                    f_parkour.vector.reshape(-1)
 
             for n in range(num_object_contact_joints):
                 j = list_object_contact_joints[n]
@@ -277,7 +277,7 @@ class Optimizer(object):
                 # 2. from "contact" frame to Parkour joint frame
                 f_parkour = parkourM_c.act(f_c)
                 contact_forces_parkour[i,k,:] += \
-                    f_parkour.vector.getA().reshape(-1)
+                    f_parkour.vector.reshape(-1)
 
         return contact_forces_parkour
 
@@ -328,13 +328,13 @@ class Optimizer(object):
                 cR_local = self.person_model.data.oMi[j+1].rotation
                 localM_c = se3.SE3(cR_local.transpose(), zero(3))
                 f_local = localM_c.act(f_c)
+                f_local_T = np.array([f_local.vector]).T
                 if j in [3,7] and j in list_ground_contact_joints:
                     n = list_ground_contact_joints.index(j)
-                    seqLocalForceGround_GT[(6*n):(6*n+6), i] = \
-                        f_local.vector
+                    seqLocalForceGround_GT[(6*n):(6*n+6), i] = f_local_T
                 elif j in [18, 23] and j in list_object_contact_joints:
                     n = list_object_contact_joints.index(j)
-                    seqForceObject_GT[(6*n):(6*n+6), i] = f_local.vector
+                    seqForceObject_GT[(6*n):(6*n+6), i] = f_local_T
 
         return seqLocalForceGround_GT, seqForceObject_GT
 
@@ -360,7 +360,7 @@ class Optimizer(object):
                 j = list_object_contact_joints[n]
                 oMc = person.data.oMi[j+1]
                 self.PlaceForceArrow(self.names_forceObj[n], oMc,
-                                     cPhicObj[(6*n):(6*n+6),0],
+                                     cPhicObj[(6*n):(6*n+6)],
                                      color_linfor, color_torque)
         if cPhicGd is not None:
             for n in range(len(list_ground_contact_joints)):
@@ -407,14 +407,14 @@ class Optimizer(object):
             g.LineSegments(
                 g.PointsGeometry(vertices),
                 g.MeshLambertMaterial(color=rgb_to_hex(color_muscle_torque))))
-        self.viewer[name].set_transform(oMtau.homogeneous.getA())
+        self.viewer[name].set_transform(oMtau.homogeneous)
 
 
     def PlaceForceArrow(self, name, oMc, cPhic, color_linfor, color_torque):
         name_linfor = name+'f'
         name_torque = name+'t'
-        linfor = cPhic[:3,0]
-        torque = cPhic[3:,0]
+        linfor = cPhic[:3]
+        torque = cPhic[3:]
         val_linfor = max(LA.norm(linfor), 1e-4)
         val_torque = max(LA.norm(torque), 1e-4)
         dir_linfor = linfor/val_linfor
@@ -431,7 +431,7 @@ class Optimizer(object):
             g.LineSegments(
                 g.PointsGeometry(vertices),
                 g.MeshBasicMaterial(color=rgb_to_hex(color_linfor))))
-        self.viewer[name_linfor].set_transform(oMlinfor.homogeneous.getA())
+        self.viewer[name_linfor].set_transform(oMlinfor.homogeneous)
 
         # Place torque
         vertices = [[0.,0.,0.], [val_torque/728.22,0.,0.]] # normalize torque
@@ -440,7 +440,7 @@ class Optimizer(object):
             g.LineSegments(
                 g.PointsGeometry(vertices),
                 g.MeshBasicMaterial(color=rgb_to_hex(color_torque))))
-        self.viewer[name_torque].set_transform(oMtorque.homogeneous.getA())
+        self.viewer[name_torque].set_transform(oMtorque.homogeneous)
 
 
     def SaveDecisionVariables(self,
@@ -500,7 +500,7 @@ class Optimizer(object):
         # write data to file
         if not exists(dirname(save_path)):
             makedirs(dirname(save_path))
-        with open(save_path, 'w') as f:
+        with open(save_path, 'wb') as f:
             pickle.dump(params, f)
             print('Decision variables saved to {}'.format(save_path))
 
@@ -508,9 +508,9 @@ class Optimizer(object):
         '''
         Load the decision varialbes from file and recover the dataloader's state.
         '''
-        with open(pkl_path, 'r') as f:
+        with open(pkl_path, 'rb') as f:
             # load data
-            params = pickle.load(f)
+            params = pickle.load(f, encoding='latin-1')
             fps = params["fps"]
             focal_length = params["focal_length"]
             config_person = params["config_person"]
@@ -671,6 +671,7 @@ class Optimizer(object):
 
         # create another person model with visuals if necessary
         if show_person and show_person_baseline:
+            # debug
             person_baseline = Person("person_baseline",
                             self.person_model.smpl_joints_neutral_pose,
                             self.person_model.openpose_keypoints_neutral_pose,
@@ -679,10 +680,12 @@ class Optimizer(object):
                             opacity=0.2)
         # create another tool model with visuals if necessary
         if show_object:# and show_object_baseline:
+            # debug
             handle_length = self.object_loader.config_keypoints_[0,0]
             self.object_model.UpdateHandleVisuals(handle_length)
 
         if show_openpose_joints:
+            # debug
             names_openpose_joints = self.person_model.keypoint_names
             colors_openpose_joints = self.person_model.keypoint_colors
             visuals_openpose_joints = PointCloud('openpose_joints',
@@ -693,6 +696,7 @@ class Optimizer(object):
                                         size=0.02)
 
         if show_reprojected_keypoints:
+            # debug
             person_loader.UpdateKeypoint2dReprojected(self.camera)
             names_openpose_joints = self.person_model.keypoint_names
             colors_openpose_joints = self.person_model.keypoint_colors
@@ -705,6 +709,7 @@ class Optimizer(object):
                            size=0.02)
 
         if show_reprojected_joints:
+            # debug
             # | limb name | limb color |
             # | --------- | ---------- |
             # | pelvis    | red        |
@@ -737,6 +742,7 @@ class Optimizer(object):
                            size=0.02)
 
         if show_object_2d:
+            # debug
             print("Object colors: handle end is Red; head is Green!")
             names_object_endpoints = ['handle_tip', 'tool_head']
             colors_object_endpoints = [[255,0,0], [0,255,0]]
@@ -763,6 +769,7 @@ class Optimizer(object):
             show_force_gt = False
 
         if screenshot_folder is not None:
+            # debug
             cache_folder = join(dirname(screenshot_folder),
                                 "screenshot_cache")
             recorder = VideoRecorder(self.viewer, cache_folder,
@@ -771,6 +778,7 @@ class Optimizer(object):
         # Change camera view
         set_meshcat_camera_view(self.viewer, camera_angle)
         self.viewer['/Axes'].set_property("visible", False)
+        self.viewer['/Grid'].set_property("visible", False)
 
         # Visualize frame by frame
         for i in frames:
@@ -836,7 +844,7 @@ class Optimizer(object):
                                        extension='jpg',
                                        delay=0.1)
             elif pause:
-                raw_input('#{}. Press any key to continue...'.format(i))
+                input('#{}. Press any key to continue...'.format(i))
             else:
                 time.sleep(self.dt)
 

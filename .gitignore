@@ -41,6 +41,3 @@ baseline
 temp
 
 build/*
-data/*
-!data/lib/
-!data/scripts/
