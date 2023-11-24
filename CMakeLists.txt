@@ -5,7 +5,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.11)
 # ----------------------------------------------------
 SET(PROJECT_NAME mfv)
 SET(PROJECT_DESCRIPTION "Estimating 3D Motion and Forces of Person-Object Interactions from Monocular Video.")
-SET(PROJECT_URL "http://github.com/zongmianli/human-object-contact")
+SET(PROJECT_URL "https://github.com/zongmianli/Estimating-3D-Motion-Forces")
 OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" ON)
 
 SET(DOXYGEN_USE_MATHJAX YES)
@@ -61,7 +61,6 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 # Find Ceres solver
 FIND_PACKAGE(Ceres REQUIRED)
-#FIND_PACKAGE(Ceres REQUIRED PATHS "/home/zongmian/Predator/Software/install")
 INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
 
 # Check for dependency using pkg-config

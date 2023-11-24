@@ -1,79 +1,91 @@
-# Estimating 3D Motion & Forces of Person-Object Interactions from Monocular Video
-
+# Estimating 3D Motion & Forces
 Zongmian Li, Jiri Sedlar, Justin Carpentier, Ivan Laptev, Nicolas Mansard and Josef Sivic
 
-This repository hosts the code of the estimation stage for the [Motion-Forces-from-Video](https://www.di.ens.fr/willow/research/motionforcesfromvideo/) project.
+[[Project Page](https://www.di.ens.fr/willow/research/motionforcesfromvideo/)] [[arXiv](https://arxiv.org/pdf/1904.02683.pdf)] [[Oral Slides](https://www.di.ens.fr/willow/research/motionforcesfromvideo/research/li19mfv/li2019motionforces_slides.pdf)] [[Poster](https://www.di.ens.fr/willow/research/motionforcesfromvideo/research/li19mfv/li2019motionforces_poster.pdf)]
 
 ![Parkour Demo](./demo-parkour.gif)
 
-## Introduction
+## Description
 
-The 3D motion-force estimator relies on a number of open-source libraries listed as follows.
-As a quick setup, users can compile the solver and test the demo code using precomputed data.
+This repository hosts the estimating stage implementation of the paper: [Estimating 3D Motion and Forces of Person-Object Interactions from Monocular Video](https://arxiv.org/pdf/1904.02683.pdf) *(Best Paper Finalist @ CVPR 2019)*.
 
-The recognition stage is only required if you want to apply the method to new videos. 
-If this is the case, consider installing the following open-source projects:
+As a quick setup, users can compile the trajectory estimator and evaluate its performance by running the demo script using precomputed 2D measurements. 
 
-- Openpose (we are using this [fork](https://github.com/zongmianli/Realtime_Multi-Person_Pose_Estimation)), or any perferred 2D pose estimator.
-- HMR (use this [fork](https://github.com/zongmianli/HMR-imagefolder) instead), or any 3D pose estimator that outputs SMPL joint angles. Another good option is [FrankMocap](https://github.com/facebookresearch/frankmocap).
-- Use [Contact recognizer](https://github.com/zongmianli/contact-recognizer), or the [hand-object detector from Michigan](https://github.com/ddshan/hand_object_detector).
-- Use [Object endpoint recognizer](https://github.com/sedlaj45/endpoints), or any object segmentation model of your choice.
+If you are applying the method to new videos, you'll need the recognition stage to generate 2D measurements from pixels. 
+In that case, consider installing the following open-source projects:
+- Human 2D poses: use [Openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose). 
+- Human 3D poses (required for trajectory initialization): any SMPL(-X) based pose estimator should be fine. For example, use [HMR](https://github.com/akanazawa/hmr) or [FrankMocap](https://github.com/facebookresearch/frankmocap).
+- Contact states: we used [contact-recognizer](https://github.com/zongmianli/contact-recognizer). The [hand-object detector](https://github.com/ddshan/hand_object_detector) is a nice alternative for it's trained on large-scale Internet data and should generalize well to novel scenes. 
+- Object 2D keypoints: use [object endpoint recognizer](https://github.com/sedlaj45/endpoints) or any object segmentation model of your choice.
 
-## Installing via pip/conda
-We are working on this. Stay tuned!
+Consider :star: this repo if you find the work relevant.
+Feel free to open an [issue](https://github.com/zongmianli/Estimating-3D-Motion-Forces/issues) if you need technical support or have suggestions.
 
-## Build from source
+## Installation
 
-### Dependencies
+First of all, note that we need [CMake](https://cmake.org/) to generate native build files for Ceres and our motion-force estimator. CMake can be install via APT:
+```terminal
+sudo apt install cmake
+```
+Use `brew install cmake` if you work on macOS.
 
-- Python 3 (tested on version 3.8.17)
-- [CMake](https://cmake.org/) (tested on version 3.27.5)
-- [Boost](https://www.boost.org/) with component Python (tested on version 1.78.0)
-- [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) (tested on version 3.4.0)
-- [EigenPy](https://github.com/stack-of-tasks/eigenpy) (required for the python bindings; tested on version 3.1.0.)
-- [Pinocchio](https://stack-of-tasks.github.io/pinocchio/) with option Python binding (tested on version 2.6.20)
-- [Ceres solver](http://ceres-solver.org/installation.html) with components EigenSparse, SparseLinearAlgebraLibrary, LAPACK, SuiteSparse, CXSparse, AccelerateSparse, SchurSpecializations (tested on version 2.2.0)
+### Step I. Install Ceres
 
-### Installation
+You can either download a stable release (Ceres 2.2 or later) from [the official website](http://ceres-solver.org/installation.html) or clone the latest version: 
+```terminal
+git clone https://ceres-solver.googlesource.com/ceres-solver
+cd ceres-solver
+```
+Follow the instructions in [Ceres installation guide](http://ceres-solver.org/installation.html) to install dependencies, build and install Ceres.
+Make sure that Ceres can be found by CMake after `make install`.
 
-Please note that, for convenience, we will use `~/Estimating-3D-Motion-Forces` as the default local directory for hosting the code base and the demo data.
+### Step II. Build the motion-force estimator
 
-1. Make a local copy of the project:
+1. First, make a local copy of this repo:
    ```terminal
-   git clone https://github.com/zongmianli/Estimating-3D-Motion-Forces.git ~/Estimating-3D-Motion-Forces
-   cd ~/Estimating-3D-Motion-Forces
+   git clone https://github.com/zongmianli/Estimating-3D-Motion-Forces.git
+   cd Estimating-3D-Motion-Forces
    ```
-   
-2. Move to `~/Estimating-3D-Motion-Forces`, create a top-level directory `build` and move there:
+2. Create a `conda` enviroment, using:
    ```terminal
-   cd ~/Estimating-3D-Motion-Forces
+   conda env create -f enviroment.yml
+   conda activate estmf
+   ```
+   Alternatively, you can try the following steps if `conda` is too slow:
+   ```
+   conda create --name estmf python=3.8
+   conda activate estmf
+   ```
+   Install [Pinocchio](https://stack-of-tasks.github.io/pinocchio/) and the other dependencies:
+   ```
+   conda install pinocchio -c conda-forge
+   pip install -r requirements.txt
+   ```
+   Note that [EigenPy](https://github.com/stack-of-tasks/eigenpy) should be available once Pinocchio installed. Install it manually if it's not the case, using `conda install eigenpy -c conda-forge`. EigenPy helps to bind our C++ solver in Python.
+   
+3. Generate build files using CMake. In `/Estimating-3D-Motion-Forces`, type:
+   ```terminal
    mkdir build && cd build
-   ```
-   
-3. Install the dependencies in an isolated enviroment for the project. `conda` is recommended.
-   
-4. Configure with CMake in *Release* mode:
-   ```terminal
    cmake .. -DCMAKE_BUILD_TYPE=Release
    ```
    Make sure to add `-DCMAKE_BUILD_TYPE=Release` at this stage. Otherwise Ceres will run in debug mode and will be very slow.
-
-5. Build the project from source code:
+   
+4. Finally, build the solver for our motion-force estimator:
    ```terminal
    make -j4
    ```
-The compilation generally takes around 2-10 minutes, depending on your hardware. 
-Finally you will find the compiled solver library in `~/Estimating-3D-Motion-Forces/lib/solver.so`.
-## Demo code
-Run the following script to generate the teaser demo:
+   The process can take a few minutes. Finally you will find the compiled solver in `/Estimating-3D-Motion-Forces/lib/solver.so`. It's callable from Python.
+
+## Example usage
+We provide a demo code showing how to use the code. In `/Estimating-3D-Motion-Forces`, run:
 ```
-cd ~/Estimating-3D-Motion-Forces
 source scripts/demo.sh
 ```
+This sample sequence is extracted from the [Parkour dataset](https://github.com/zongmianli/Parkour-dataset).
 
 ## Citation
 
-If you find the code useful, please consider citing:
+If you find this work helpful, please consider citing:
 ```bibtex
 @InProceedings{li2019motionforcesfromvideo,
   author={Zongmian Li and Jiri Sedlar and Justin Carpentier and Ivan Laptev and Nicolas Mansard and Josef Sivic},
@@ -82,9 +94,9 @@ If you find the code useful, please consider citing:
   year={2019}
 }
 
-@article{li2022estimating,
-  title={Estimating 3D motion and forces of human--Object interactions from internet videos},
-  author={Li, Zongmian and Sedlar, Jiri and Carpentier, Justin and Laptev, Ivan and Mansard, Nicolas and Sivic, Josef},
+@article{li2022estimating,         
+  title={Estimating 3D Motion and Forces of Human-Object Interactions from Internet Videos},
+  author={Zongmian Li and Jiri Sedlar and Justin Carpentier and Ivan Laptev and Nicolas Mansard and Josef Sivic},
   journal={International Journal of Computer Vision},
   volume={130},
   number={2},
