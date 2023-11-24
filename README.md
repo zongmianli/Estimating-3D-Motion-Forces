@@ -41,9 +41,9 @@ Make sure that Ceres can be found by CMake after `make install`.
 
 ### Step II. Build the motion-force estimator
 
-1. First, make a local copy of this repo:
+1. First, clone this repo and its submodules (using `--recursive`):
    ```terminal
-   git clone https://github.com/zongmianli/Estimating-3D-Motion-Forces.git
+   git clone --recursive https://github.com/zongmianli/Estimating-3D-Motion-Forces.git
    cd Estimating-3D-Motion-Forces
    ```
 2. Create a `conda` enviroment, using:
